@@ -2,14 +2,13 @@
 // Created by s18 on 1/21/17.
 //
 
-#ifndef STRACE_ERROR_H
-# define STRACE_ERROR_H
+#pragma once
+#include <errno.h>
 
-# include <errno.h>
-
-# define ERR_FORK	"fork error"
-# define ERR_EXEC	"exec error"
+#define ERR_FORK	"fork error"
+#define ERR_EXEC	"exec error"
+#define ERR_WAIT	"Wait error"
+#define ERR_TRAC	"Ptrace error"
 
 void	fatal(const char* msg);
 
-#endif
