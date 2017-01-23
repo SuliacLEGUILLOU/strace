@@ -1,5 +1,5 @@
 
-#include "strace.h"
+#include "../hdrs/strace.h"
 
 static void	st_show_usage()
 {

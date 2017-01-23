@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 #include <stdarg.h>
 #include <limits.h>
 #include <ctype.h>
@@ -16,6 +15,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+# include "error.h"
+
 #define PROGRAM_NAME	"ft_strace"
 
-int	strace(const char** av, const char** env);
+int		strace(const char** av, const char** env);
+char	*getpath(const char* cmd, const char** env);

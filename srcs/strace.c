@@ -1,26 +1,24 @@
 
-#include "strace.h"
+#include "../hdrs/strace.h"
 
 int		strace(const char** cmd, const char** env)
 {
-	char*	bin;
+	char*	bin = getpath(cmd[0], env);
+	int		ret = 0;
 	pid_t	pid;
-	int	ret;
 
-	ret = 0;
-	bin = cmd[0];		// Check to match against PATH
-	if (access(bin, X_OK))	// Test to be done on previous line
-		return (1);	// Need error management
-	
+	if (!bin)
+		fatal(ERR_EXEC);
 	pid = fork();
 	if (pid == -1)
-		return (1);
+		fatal(ERR_FORK);
 	else if (pid == 0){
-		execve(bin, cmd, env);
-		exit(1);
+		kill(getpid(), SIGSTOP);
+		execve(bin, (char**)cmd, (char**)env);
+		fatal(ERR_EXEC);
 	}
 	else {
-		wait(-1);
+		wait(0);
 		ret = 0;
 	}
 	return (ret);
