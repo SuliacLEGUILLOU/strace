@@ -1,5 +1,6 @@
 
 #include "../hdrs/strace.h"
+#include "../hdrs/signal.h"
 
 static t_trap	st_trapPid(pid_t pid, int* status)
 {
@@ -12,7 +13,7 @@ static t_trap	st_trapPid(pid_t pid, int* status)
 
 		if (WIFSTOPPED(*status)) {
 			signal = WSTOPSIG(*status);
-			if (signal & SYSCAL_MASK)
+			if (signal & SYSCALL_MASK)
 				return (syscall_);
 			else
 				return (signal_);
@@ -22,23 +23,55 @@ static t_trap	st_trapPid(pid_t pid, int* status)
 	}
 }
 
+static int	st_trap_signal(pid_t pid, int* status)
+{
+	return printf("Signal catch\n");
+}
+
+static int	st_trap_syscall(pid_t pid, int* status)
+{
+	long						syscall, ret;
+	const t_syscall_info*		info;
+	t_syscall_arg				args[ARGC_MAX];
+	t_trap						trap;
+	void*						retVal;
+
+	syscall = get_usr(pid, ORIG_RAX);
+	get_arg(pid, syscall, args);
+	//printf("Print first trap\n");
+
+	trap = st_trapPid(pid, status);
+	if (trap == exit_){
+		printf("Unknow return\n");
+		return (1);
+	}
+	else if (trap == syscall_) {
+		ret = get_usr(pid, RAX);
+		info = get_syscall_info(syscall);
+		retVal = (info) ? get_val(pid, info->ret_type, ret) : NULL;
+		print_syscall(info, args, retVal);
+	}
+	else if (trap == signal_)
+		return (st_trap_signal(pid, status));
+	return (0);
+}
+
 static int	st_trace(pid_t pid)
 {
 	t_trap	trap;
-	int 	status;
-	int 	ret;
+	int		status;
+	int		cont;
 
 	if (ptrace(PTRACE_SEIZE, pid, NULL, OPTION_PTRACE))
 		fatal(ERR_TRAC);
-
 	do {
+		cont = 0;
 		trap = st_trapPid(pid, &status);
 		if (trap == syscall_)
-			printf("Syscall\n");
+			cont = st_trap_syscall(pid, &status);
 		else if (trap == signal_)
-			printf("Signal_");
-	} while (trap != exit_);
-
+			cont = st_trap_signal(pid, &status);
+	} while (trap != exit_ && !cont);
 	return (0);
 }
 

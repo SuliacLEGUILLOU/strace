@@ -13,6 +13,6 @@ int main(int ac, char **av, char **env)
 	if (ac < 2) 
 		st_show_usage();
 	else
-		status = strace(av + 1, env);
+		status = strace((const char**)av + 1, (const char**)env);
 	return (status);
 }

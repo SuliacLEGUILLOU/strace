@@ -2,7 +2,6 @@
 // Created by s18 on 1/19/17.
 //
 
-#include <sys/stat.h>
 #include "../hdrs/strace.h"
 
 static char*	st_explore_path(const char* cmd, const char* path)
